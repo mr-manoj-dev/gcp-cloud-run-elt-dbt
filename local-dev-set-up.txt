@@ -1,0 +1,146 @@
+Step : 01 [Create infra/resources into GCP]
+
+1.create BQ Dataset with name : qatar_fifa_world_cup
+
+2.Enable Cloud Run Admin API
+    Using gcloud : $> gcloud services enable run.googleapis.com
+    Using GCP console:
+    URL : https://console.cloud.google.com/apis/library/run.googleapis.com?project=burner-mankumar24-02
+
+3.Create Service Account & Provide required roles[
+	BigQuery Job User - Data set level
+	BigQuery User - Data set level
+	Cloud Build Editor - Project level
+	Cloud Build Service Account - Project level
+	Cloud Run Developer - Project level
+]
+
+4.Create a storage bucket IF you are not submitting the job through github with name : <gcp_project_id>_cloudbuild
+
+5. create a folder into Artifact Registry at same region with name : internal-images
+
+Step : 02 [Authenticate with you GCP credential]
+	$>gcloud auth application-default login
+	This will launch a browser(use chrome as default) and provide your GCP identiy 
+	OR copy the URL from the console and paste into chrome and provide your GCP identiy
+
+
+Step : 03 [Set environment variable into gcloud SDK]
+	Run below commands to set gcp project configurations accordinly:
+	export PROJECT_ID=$(gcloud projects list --format="value(projectId)" | grep burner-mankumar24-02)
+	export LOCATION="us-central1"
+	export REPO_NAME="internal-images"
+	export JOB_NAME="gcp-cloud-run-elt-dbt"
+	export IMAGE_TAG="latest"
+	export SERVICE_ACCOUNT="sa-cloud-run-dev@$PROJECT_ID.iam.gserviceaccount.com"
+
+Step : 04 [load the raw table so that your DBT app can take it as input and run the transormation defined into model]
+	Run the below script to create raw table and load data into BQ
+	$> sh create_and_load_team_stats_raw_table.sh
+
+
+Step : 05 [Submit cloud build and validate the logs]
+	
+	1. Submit cloud build:
+
+	Once you are done with Step:04, validate the table and data into BQ
+	Now, Run below command to submit cloud build which shall build a docker image and deploy it into Coud Run
+	Ref to deployment file : deploy-dbt-app-cloud-run-job.yaml
+	$>gcloud builds submit \
+    --project=$PROJECT_ID \
+    --region=$LOCATION \
+    --config deploy-dbt-app-cloud-run-job.yaml \
+    --substitutions _REPO_NAME="$REPO_NAME",_JOB_NAME="$JOB_NAME",_IMAGE_TAG="$IMAGE_TAG",_SERVICE_ACCOUNT="$SERVICE_ACCOUNT" \
+    --verbosity="debug" .
+
+    2. You will start getting some debug statments and after couple of seconds(depends upon your docker file, app code etc) you will finished with build, you can validate the status into Cloud Build into GCP console
+
+    Go to Cloud Build : https://console.cloud.google.com/cloud-build/builds;region=us-central1?project=burner-mankumar24-02
+
+
+
+    3. Post successful run of Cloud build shall create a docker image and push the image into artifact registry:
+
+    Go to Artifact Registry into GCP console and check the image into the folder you created(internal-images): https://console.cloud.google.com/artifacts?project=burner-mankumar24-02
+
+    you can see your docker image URL like : us-central1-docker.pkg.dev/burner-mankumar24-02/internal-images/gcp-cloud-run-elt-dbt:latest
+
+
+    4. Validate deployment into Cloud Run:
+    You can see your Job submitted through the file(deploy-dbt-app-cloud-run-job.yaml) : https://console.cloud.google.com/run/jobs?project=burner-mankumar24-02
+
+    Check the logs history of the deployment and validate your application logs
+    Check BQ once your job finished the execution and validate the tables/views.
+    
+
+
+
+
+
+export PROJECT_ID=$(gcloud projects list --format="value(projectId)" | grep burner-mankumar24-02)
+
+
+us-central1-docker.pkg.dev/burner-mankumar24-02/internal-images
+
+
+
+
+gcloud builds submit \
+    --project=$PROJECT_ID \
+    --region=$LOCATION \
+    --config deploy-dbt-app-cloud-run-job.yaml \
+    --substitutions _REPO_NAME="$REPO_NAME",_JOB_NAME="$JOB_NAME",_IMAGE_TAG="$IMAGE_TAG",_SERVICE_ACCOUNT="$SERVICE_ACCOUNT" \
+    --verbosity="debug" .
+
+
+
+DEBUG: Running [gcloud.builds.submit] with arguments: [--config: "deploy-dbt-app-cloud-run-job.yaml", --project: "burner-mankumar24-02", --region: "us-central1", --substitutions: "OrderedDict([('_REPO_NAME', 'internal-images'), ('_JOB_NAME', 'gcp-cloud-run-elt-dbt'), ('_IMAGE_TAG', 'latest'), ('_SERVICE_ACCOUNT', 'sa-cloud-run-dev@burner-mankumar24-02.iam.gserviceaccount.com')])", --verbosity: "debug", SOURCE: "."]
+DEBUG: Starting new HTTPS connection (1): storage.googleapis.com:443
+DEBUG: https://storage.googleapis.com:443 "GET /storage/v1/b/burner-mankumar24-02_cloudbuild?alt=json HTTP/1.1" 404 247
+DEBUG: Starting new HTTPS connection (1): storage.googleapis.com:443
+DEBUG: https://storage.googleapis.com:443 "POST /storage/v1/b?alt=json&enableObjectRetention=False&project=burner-mankumar24-02 HTTP/1.1" 412 368
+DEBUG: (gcloud.builds.submit) HTTPError 412: 'us' violates constraint 'constraints/gcp.resourceLocations'
+Traceback (most recent call last):
+  File "/Users/mankumar24/Documents/Tools/GCP/google-cloud-sdk/lib/googlecloudsdk/api_lib/storage/storage_api.py", line 385, in CreateBucketIfNotExists
+    self.client.buckets.Get(self.messages.StorageBucketsGetRequest(
+  File "/Users/mankumar24/Documents/Tools/GCP/google-cloud-sdk/lib/googlecloudsdk/generated_clients/apis/storage/v1/storage_v1_client.py", line 266, in Get
+    return self._RunMethod(
+  File "/Users/mankumar24/Documents/Tools/GCP/google-cloud-sdk/lib/third_party/apitools/base/py/base_api.py", line 737, in _RunMethod
+    return self.ProcessHttpResponse(method_config, http_response, request)
+  File "/Users/mankumar24/Documents/Tools/GCP/google-cloud-sdk/lib/third_party/apitools/base/py/base_api.py", line 743, in ProcessHttpResponse
+    self.__ProcessHttpResponse(method_config, http_response, request))
+  File "/Users/mankumar24/Documents/Tools/GCP/google-cloud-sdk/lib/third_party/apitools/base/py/base_api.py", line 609, in __ProcessHttpResponse
+    raise exceptions.HttpError.FromResponse(
+apitools.base.py.exceptions.HttpNotFoundError: HttpError accessing <https://storage.googleapis.com/storage/v1/b/burner-mankumar24-02_cloudbuild?alt=json>: response: <{'content-type': 'application/json; charset=UTF-8', 'date': 'Tue, 27 Aug 2024 21:53:17 GMT', 'vary': 'Origin, X-Origin', 'cache-control': 'no-cache, no-store, max-age=0, must-revalidate', 'expires': 'Mon, 01 Jan 1990 00:00:00 GMT', 'pragma': 'no-cache', 'x-guploader-uploadid': 'AHxI1nOM9oeIGgXWVdP6UPdG2uhPBG60OuqOndu4YNTdLmACDZjSSaQzZiyAnPx8TDKkQrAUA8E', 'content-length': '247', 'server': 'UploadServer', 'alt-svc': 'h3=":443"; ma=2592000,h3-29=":443"; ma=2592000', 'status': 404}>, content <{
+  "error": {
+    "code": 404,
+    "message": "The specified bucket does not exist.",
+    "errors": [
+      {
+        "message": "The specified bucket does not exist.",
+        "domain": "global",
+        "reason": "notFound"
+      }
+    ]
+  }
+}
+>
+
+
+
+apitools.base.py.exceptions.HttpNotFoundError: HttpError accessing <https://storage.googleapis.com/storage/v1/b/gcp-poc-2325_cloudbuild?alt=json>: response: <{'content-type': 'application/json; charset=UTF-8', 'date': 'Tue, 27 Aug 2024 21:53:17 GMT', 'vary': 'Origin, X-Origin', 'cache-control': 'no-cache, no-store, max-age=0, must-revalidate', 'expires': 'Mon, 01 Jan 1990 00:00:00 GMT', 'pragma': 'no-cache', 'x-guploader-uploadid': 'AHxI1nOM9oeIGgXWVdP6UPdG2uhPBG60OuqOndu4YNTdLmACDZjSSaQzZiyAnPx8TDKkQrAUA8E', 'content-length': '247', 'server': 'UploadServer', 'alt-svc': 'h3=":443"; ma=2592000,h3-29=":443"; ma=2592000', 'status': 404}>, content <{
+  "error": {
+    "code": 404,
+    "message": "The specified bucket does not exist.",
+    "errors": [
+      {
+        "message": "The specified bucket does not exist.",
+        "domain": "global",
+        "reason": "notFound"
+      }
+    ]
+  }
+}
+
+IED: Cloud Run Admin API has not been used in project burner-mankumar24-02 before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/run.googleapis.com/overview?project=burner-mankumar24-02 then retry. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry. This command is authenticated as 294533634708-compute@developer.gserviceaccount.com which is the active account specified by the [core/account] property.
+

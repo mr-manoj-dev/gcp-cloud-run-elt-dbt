@@ -7,7 +7,8 @@ set -u
 export PROJECT_ID=$(gcloud projects list --format="value(projectId)" | grep burner-mankumar24-02)
 export LOCATION="us-central1"
 export REPO_NAME="internal-images"
-export JOB_NAME="gcp-cloud-run-elt-dbt"
+export JOB_NAME="gcp-cloud-run-elt-dbt-job-01"
+export SERVICE_NAME="gcp-cloud-run-elt-dbt-svc-01"
 export IMAGE_TAG="latest"
 export SERVICE_ACCOUNT="sa-cloud-run-dev@$PROJECT_ID.iam.gserviceaccount.com"
 
@@ -15,6 +16,7 @@ echo "PROJECT_ID: $PROJECT_ID"
 echo "LOCATION: $LOCATION"
 echo "REPO_NAME: $REPO_NAME"
 echo "JOB_NAME: $JOB_NAME"
+echo "SERVICE_NAME: $SERVICE_NAME"
 echo "IMAGE_TAG: $IMAGE_TAG"
 echo "SERVICE_ACCOUNT: $SERVICE_ACCOUNT"
 

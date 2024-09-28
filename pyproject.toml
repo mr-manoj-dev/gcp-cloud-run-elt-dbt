@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "gcp-cloud-run-elt-dbt"
+name = "gcp-cloud-run-elt-dbt-v1"
 version = "0.1.0"
 description = "A real world use case of ELT with DBT and BigQuery, based on Qatar Fifa World Cup Data"
 package-mode = false

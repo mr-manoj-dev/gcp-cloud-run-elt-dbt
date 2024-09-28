@@ -30,7 +30,7 @@ Step : 03 [Set environment variable into gcloud SDK]
 	export PROJECT_ID=$(gcloud projects list --format="value(projectId)" | grep burner-mankumar24-02)
 	export LOCATION="us-central1"
 	export REPO_NAME="internal-images"
-	export JOB_NAME="gcp-cloud-run-elt-dbt"
+	export SERVICE_NAME="gcp-cloud-run-elt-dbt-v1"
 	export IMAGE_TAG="latest"
 	export SERVICE_ACCOUNT="sa-cloud-run-dev@$PROJECT_ID.iam.gserviceaccount.com"
 
@@ -63,7 +63,7 @@ Step : 05 [Submit cloud build and validate the logs]
 
     Go to Artifact Registry into GCP console and check the image into the folder you created(internal-images): https://console.cloud.google.com/artifacts?project=burner-mankumar24-02
 
-    you can see your docker image URL like : us-central1-docker.pkg.dev/burner-mankumar24-02/internal-images/gcp-cloud-run-elt-dbt:latest
+    you can see your docker image URL like : us-central1-docker.pkg.dev/burner-mankumar24-02/internal-images/gcp-cloud-run-elt-dbt-v1:latest
 
 
     4. Validate deployment into Cloud Run:
@@ -94,7 +94,7 @@ gcloud builds submit \
 
 
 
-DEBUG: Running [gcloud.builds.submit] with arguments: [--config: "deploy-dbt-app-cloud-run-job.yaml", --project: "burner-mankumar24-02", --region: "us-central1", --substitutions: "OrderedDict([('_REPO_NAME', 'internal-images'), ('_JOB_NAME', 'gcp-cloud-run-elt-dbt'), ('_IMAGE_TAG', 'latest'), ('_SERVICE_ACCOUNT', 'sa-cloud-run-dev@burner-mankumar24-02.iam.gserviceaccount.com')])", --verbosity: "debug", SOURCE: "."]
+DEBUG: Running [gcloud.builds.submit] with arguments: [--config: "deploy-dbt-app-cloud-run-job.yaml", --project: "burner-mankumar24-02", --region: "us-central1", --substitutions: "OrderedDict([('_REPO_NAME', 'internal-images'), ('_JOB_NAME', 'gcp-cloud-run-elt-dbt-v1'), ('_IMAGE_TAG', 'latest'), ('_SERVICE_ACCOUNT', 'sa-cloud-run-dev@burner-mankumar24-02.iam.gserviceaccount.com')])", --verbosity: "debug", SOURCE: "."]
 DEBUG: Starting new HTTPS connection (1): storage.googleapis.com:443
 DEBUG: https://storage.googleapis.com:443 "GET /storage/v1/b/burner-mankumar24-02_cloudbuild?alt=json HTTP/1.1" 404 247
 DEBUG: Starting new HTTPS connection (1): storage.googleapis.com:443

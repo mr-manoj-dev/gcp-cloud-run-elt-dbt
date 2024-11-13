@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, request, jsonify
 import os
 import subprocess
 import logging
@@ -12,9 +12,8 @@ def hello_world():
 
 
 @app.route('/invoke', methods=['GET'])
-def handler():
+def invoke():
     try:
-        # Execute the shell script
         # subprocess.run(['run_dbt.sh'], check=True, cwd='/dbt')
         script_path = os.path.abspath('/dbt/run_dbt.sh')
         # Verify the script path
@@ -22,6 +21,33 @@ def handler():
             logging.error(f"Script not found at: {script_path}")
             return f"Script not found at: {script_path}", 404
 
+        # call DBT script
+        result = subprocess.run(f"bash {script_path}", shell=True, check=True)
+        if result.returncode == 0:
+            logging.info(f"DBT ran with return code: {str(result.returncode)}")
+            return "Script executed successfully", 200
+    except subprocess.CalledProcessError as e:
+        logging.error(f"An error occurred: {e}")
+        return f"An error occurred: {e}", 500
+
+
+@app.route('/invoke', methods=['POST'])
+def invoke_dbt():
+    try:
+        # Get JSON data from request body
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "No data provided"}), 400
+
+        logging.info(f"Message : {data}")
+
+        script_path = os.path.abspath('/dbt/run_dbt.sh')
+        # Verify the script path
+        if not os.path.isfile(script_path):
+            logging.error(f"Script not found at: {script_path}")
+            return f"Script not found at: {script_path}", 404
+
+        # call DBT script
         result = subprocess.run(f"bash {script_path}", shell=True, check=True)
         if result.returncode == 0:
             logging.info(f"DBT ran with return code: {str(result.returncode)}")

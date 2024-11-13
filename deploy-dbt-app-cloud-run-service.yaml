@@ -9,7 +9,8 @@ steps:
         --image "$IMAGE_PATH" \
         --project="$PROJECT_ID" \
         --region="$LOCATION" \
-        --service-account="$SERVICE_ACCOUNT"
+        --service-account="$SERVICE_ACCOUNT" \
+        --no-allow-unauthenticated
     env:
       - 'PROJECT_ID=$PROJECT_ID'
       - 'LOCATION=$LOCATION'

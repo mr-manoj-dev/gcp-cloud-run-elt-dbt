@@ -46,3 +46,37 @@ gcloud builds submit \
     --substitutions _REPO_NAME="$REPO_NAME",_SERVICE_NAME="$SERVICE_NAME",_IMAGE_TAG="$IMAGE_TAG",_SERVICE_ACCOUNT="$SERVICE_ACCOUNT" \
     --verbosity="debug" .
 ```
+
+
+## create service account for pub/sub topic
+```bash
+# Refer to below docs
+# https://cloud.google.com/run/docs/tutorials/pubsub#integrating-pubsub
+# create service account to invoke cloud run
+gcloud iam service-accounts create cloud-run-pubsub-invoker \
+    --display-name "Cloud Run Pub/Sub Invoker"
+    
+# Give the invoker service account permission to invoke cloud run service SERVICE_NAME:    
+gcloud run services add-iam-policy-binding gcp-cloud-run-elt-dbt-svc-v1 \
+--member=serviceAccount:cloud-run-pubsub-invoker@$PROJECT_ID.iam.gserviceaccount.com \
+--role=roles/run.invoker \
+--region=$LOCATION
+
+# Allow Pub/Sub to create authentication tokens in your project:
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+   --member=serviceAccount:service-294533634708@gcp-sa-pubsub.iam.gserviceaccount.com \
+   --role=roles/iam.serviceAccountTokenCreator
+   
+   
+   
+gcloud pubsub subscriptions create topic-01-to-trigger-cloud-run-sub-01 --topic topic-01-to-trigger-cloud-run \
+--ack-deadline=600 \
+--push-endpoint=https://gcp-cloud-run-elt-dbt-svc-v1-294533634708.us-central1.run.app/invoke/ \
+--push-auth-service-account=cloud-run-pubsub-invoker@$PROJECT_ID.iam.gserviceaccount.com
+
+
+gcloud pubsub subscriptions create topic-01-to-trigger-cloud-run-sub-02 --topic topic-01-to-trigger-cloud-run \
+--ack-deadline=600 \
+--push-endpoint=https://gcp-cloud-run-elt-dbt-svc-v1-294533634708.us-central1.run.app/ \
+--push-auth-service-account=cloud-run-pubsub-invoker@$PROJECT_ID.iam.gserviceaccount.com       
+```

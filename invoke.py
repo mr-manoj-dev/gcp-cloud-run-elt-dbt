@@ -31,7 +31,7 @@ def invoke():
         return f"An error occurred: {e}", 500
 
 
-@app.route('/invoke', methods=['POST'])
+@app.route('/invoke-post', methods=['POST'])
 def invoke_dbt():
     try:
         # Get JSON data from request body
@@ -40,6 +40,7 @@ def invoke_dbt():
             return jsonify({"error": "No data provided"}), 400
 
         logging.info(f"Message : {data}")
+        print(f"Message : {data}")
 
         script_path = os.path.abspath('/dbt/run_dbt.sh')
         # Verify the script path

@@ -10,10 +10,10 @@ DBT shall run transformation and aggregation over raw data and create and materi
 ## Publish the Docker image to Artifact Registry and deploy the Cloud Run job with Cloud Build
 
 ```bash
-export PROJECT_ID=$(gcloud projects list --format="value(projectId)" | grep burner-mankumar24-02)
+export PROJECT_ID=$(gcloud projects list --format="value(projectId)" | grep <gcp_project_name>)
 export LOCATION="us-central1"
 export REPO_NAME="internal-images"
-export SERVICE_NAME="gcp-cloud-run-elt-dbt-svc-v1"
+export SERVICE_NAME="gcp-cloud-run-elt-dbt-svc-v2"
 export IMAGE_TAG="latest"
 export SERVICE_ACCOUNT="sa-cloud-run-dev@$PROJECT_ID.iam.gserviceaccount.com"
 

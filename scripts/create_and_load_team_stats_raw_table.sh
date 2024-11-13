@@ -4,7 +4,7 @@ set -e
 set -o pipefail
 set -u
 
-export PROJECT_ID=$(gcloud projects list --format="value(projectId)" | grep burner-mankumar24-02)
+export PROJECT_ID=$(gcloud projects list --format="value(projectId)" | grep <gcp_project_name>)
 export LOCATION="us-central1"
 export REPO_NAME="internal-images"
 export JOB_NAME="gcp-cloud-run-elt-dbt-job-01"

@@ -5,7 +5,7 @@ Step : 01 [Create infra/resources into GCP]
 2.Enable Cloud Run Admin API
     Using gcloud : $> gcloud services enable run.googleapis.com
     Using GCP console:
-    URL : https://console.cloud.google.com/apis/library/run.googleapis.com?project=burner-mankumar24-02
+    URL : https://console.cloud.google.com/apis/library/run.googleapis.com?project=<gcp_project_name>
 
 3.Create Service Account & Provide required roles[
 	BigQuery Job User - Data set level
@@ -27,7 +27,7 @@ Step : 02 [Authenticate with you GCP credential]
 
 Step : 03 [Set environment variable into gcloud SDK]
 	Run below commands to set gcp project configurations accordinly:
-	export PROJECT_ID=$(gcloud projects list --format="value(projectId)" | grep burner-mankumar24-02)
+	export PROJECT_ID=$(gcloud projects list --format="value(projectId)" | grep <gcp_project_name>)
 	export LOCATION="us-central1"
 	export REPO_NAME="internal-images"
 	export SERVICE_NAME="gcp-cloud-run-elt-dbt-v1"
@@ -55,19 +55,19 @@ Step : 05 [Submit cloud build and validate the logs]
 
     2. You will start getting some debug statments and after couple of seconds(depends upon your docker file, app code etc) you will finished with build, you can validate the status into Cloud Build into GCP console
 
-    Go to Cloud Build : https://console.cloud.google.com/cloud-build/builds;region=us-central1?project=burner-mankumar24-02
+    Go to Cloud Build : https://console.cloud.google.com/cloud-build/builds;region=us-central1?project=<gcp_project_name>
 
 
 
     3. Post successful run of Cloud build shall create a docker image and push the image into artifact registry:
 
-    Go to Artifact Registry into GCP console and check the image into the folder you created(internal-images): https://console.cloud.google.com/artifacts?project=burner-mankumar24-02
+    Go to Artifact Registry into GCP console and check the image into the folder you created(internal-images): https://console.cloud.google.com/artifacts?project=<gcp_project_name>
 
-    you can see your docker image URL like : us-central1-docker.pkg.dev/burner-mankumar24-02/internal-images/gcp-cloud-run-elt-dbt-v1:latest
+    you can see your docker image URL like : us-central1-docker.pkg.dev/<gcp_project_name>/internal-images/gcp-cloud-run-elt-dbt-v1:latest
 
 
     4. Validate deployment into Cloud Run:
-    You can see your Job submitted through the file(deploy-dbt-app-cloud-run-job.yaml) : https://console.cloud.google.com/run/jobs?project=burner-mankumar24-02
+    You can see your Job submitted through the file(deploy-dbt-app-cloud-run-job.yaml) : https://console.cloud.google.com/run/jobs?project=<gcp_project_name>
 
     Check the logs history of the deployment and validate your application logs
     Check BQ once your job finished the execution and validate the tables/views.
@@ -77,10 +77,10 @@ Step : 05 [Submit cloud build and validate the logs]
 
 
 
-export PROJECT_ID=$(gcloud projects list --format="value(projectId)" | grep burner-mankumar24-02)
+export PROJECT_ID=$(gcloud projects list --format="value(projectId)" | grep <gcp_project_name>)
 
 
-us-central1-docker.pkg.dev/burner-mankumar24-02/internal-images
+us-central1-docker.pkg.dev/<gcp_project_name>/internal-images
 
 
 
@@ -94,11 +94,11 @@ gcloud builds submit \
 
 
 
-DEBUG: Running [gcloud.builds.submit] with arguments: [--config: "deploy-dbt-app-cloud-run-job.yaml", --project: "burner-mankumar24-02", --region: "us-central1", --substitutions: "OrderedDict([('_REPO_NAME', 'internal-images'), ('_JOB_NAME', 'gcp-cloud-run-elt-dbt-v1'), ('_IMAGE_TAG', 'latest'), ('_SERVICE_ACCOUNT', 'sa-cloud-run-dev@burner-mankumar24-02.iam.gserviceaccount.com')])", --verbosity: "debug", SOURCE: "."]
+DEBUG: Running [gcloud.builds.submit] with arguments: [--config: "deploy-dbt-app-cloud-run-job.yaml", --project: "<gcp_project_name>", --region: "us-central1", --substitutions: "OrderedDict([('_REPO_NAME', 'internal-images'), ('_JOB_NAME', 'gcp-cloud-run-elt-dbt-v1'), ('_IMAGE_TAG', 'latest'), ('_SERVICE_ACCOUNT', 'sa-cloud-run-dev@<gcp_project_name>.iam.gserviceaccount.com')])", --verbosity: "debug", SOURCE: "."]
 DEBUG: Starting new HTTPS connection (1): storage.googleapis.com:443
 DEBUG: https://storage.googleapis.com:443 "GET /storage/v1/b/burner-mankumar24-02_cloudbuild?alt=json HTTP/1.1" 404 247
 DEBUG: Starting new HTTPS connection (1): storage.googleapis.com:443
-DEBUG: https://storage.googleapis.com:443 "POST /storage/v1/b?alt=json&enableObjectRetention=False&project=burner-mankumar24-02 HTTP/1.1" 412 368
+DEBUG: https://storage.googleapis.com:443 "POST /storage/v1/b?alt=json&enableObjectRetention=False&project=<gcp_project_name> HTTP/1.1" 412 368
 DEBUG: (gcloud.builds.submit) HTTPError 412: 'us' violates constraint 'constraints/gcp.resourceLocations'
 Traceback (most recent call last):
   File "/Users/mankumar24/Documents/Tools/GCP/google-cloud-sdk/lib/googlecloudsdk/api_lib/storage/storage_api.py", line 385, in CreateBucketIfNotExists
@@ -142,5 +142,5 @@ apitools.base.py.exceptions.HttpNotFoundError: HttpError accessing <https://stor
   }
 }
 
-IED: Cloud Run Admin API has not been used in project burner-mankumar24-02 before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/run.googleapis.com/overview?project=burner-mankumar24-02 then retry. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry. This command is authenticated as 294533634708-compute@developer.gserviceaccount.com which is the active account specified by the [core/account] property.
+IED: Cloud Run Admin API has not been used in project <gcp_project_name> before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/run.googleapis.com/overview?project=<gcp_project_name> then retry. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry. This command is authenticated as 294533634708-compute@developer.gserviceaccount.com which is the active account specified by the [core/account] property.
 
